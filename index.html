@@ -1,146 +1,260 @@
+<!--
+MIT License
+
+Copyright (c) 2025 Matthew Abbott
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions: 
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Advanced RNN Trainer with Facade</title>
+    <title>Facaded RNN</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 2rem;
-        }
-
-        input,
-        select,
-        textarea,
-        button {
-            margin: 0.5rem 0;
-        }
-
-        .section {
-            margin-bottom: 2rem;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 1rem;
-        }
-
-        label {
-            display: block;
-            margin-top: 0.5rem;
-        }
-
-        .results {
-            background-color: #f5f5f5;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 5px;
-        }
-
-        .metric {
-            margin: 0.5rem 0;
-            font-weight: bold;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 1rem 0;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .epoch-controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .epoch-info {
-            font-style: italic;
-            color: #666;
-            margin-top: 0.5rem;
-        }
-
-        .warning {
-            color: #b36b00;
-            background-color: #fff3cd;
-            padding: 0.5rem;
-            border-radius: 4px;
-            margin: 0.5rem 0;
-        }
-
-        .error-msg {
-            color: #721c24;
-            background-color: #f8d7da;
-            padding: 0.5rem;
-            border-radius: 4px;
-            margin: 0.5rem 0;
-        }
-
-        .facade-section {
-            background-color: #e8f4f8;
-            padding: 1rem;
-            border-radius: 5px;
-            margin: 1rem 0;
-        }
-
-        .facade-controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 0.5rem;
-        }
-
-        .facade-output {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-            font-family: monospace;
-            white-space: pre-wrap;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .histogram-container {
-            display: flex;
-            align-items: flex-end;
-            height: 100px;
-            border: 1px solid #ccc;
-            margin: 0.5rem 0;
-        }
-
-        .histogram-bar {
-            background-color: #4CAF50;
-            flex: 1;
-            margin: 0 1px;
-        }
-
-        .inline {
-            display: inline-block;
-            margin-right: 1rem;
-        }
-
-        .loss-chart {
-            width: 100%;
-            height: 200px;
-            background: #fafafa;
-            border: 1px solid #ddd;
-            margin: 1rem 0;
-        }
+        body { font-family: Arial, sans-serif; margin: 2rem; background: #fafafa; }
+        .section { margin-bottom: 2rem; border-bottom: 1px solid #ccc; padding-bottom: 1rem; background: #fff; padding: 1rem; border-radius: 8px; }
+        label { display: block; margin-top: 0.5rem; }
+        input, select, textarea, button { margin: 0.5rem 0; }
+        button { padding: 8px 16px; cursor: pointer; background: #5a5a5a; color: white; border: none; border-radius: 0; }
+        button:hover { background: #4a4a4a; }
+        button:active { background: #3a3a3a; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .results { background-color: #f5f5f5; padding: 1rem; margin: 1rem 0; border-radius: 5px; }
+        .metric { margin: 0.5rem 0; font-weight: bold; }
+        table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .epoch-controls { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .epoch-info { font-style: italic; color: #666; margin-top: 0.5rem; }
+        .warning { color: #b36b00; background-color: #fff3cd; padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0; }
+        .error-msg { color: #721c24; background-color: #f8d7da; padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0; }
+        .facade-section { background-color: #e8f4f8; padding: 1rem; border-radius: 5px; margin: 1rem 0; }
+        .facade-controls { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; }
+        .facade-output { background-color: #fff; border: 1px solid #ccc; padding: 0.5rem; margin-top: 0.5rem; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .histogram-container { display: flex; align-items: flex-end; height: 100px; border: 1px solid #ccc; margin: 0.5rem 0; }
+        .histogram-bar { background-color: #4CAF50; flex: 1; margin: 0 1px; }
+        .inline { display: inline-block; margin-right: 1rem; }
+        .loss-chart { width: 100%; height: 200px; background: #fafafa; border: 1px solid #ddd; margin: 1rem 0; }
     </style>
 </head>
 
 <body>
-    <h1>Advanced RNN Trainer with Facade</h1>
+<script>
+function visualizeRNNArchitecture(rnn, containerId) {
+    if (!rnn) return;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const spacing = 85;
+    const padding = 20;
+    const legendSpace = 80;
+    const numHiddenLayers = rnn.hiddenSizes?.length || rnn.cells?.length || 0;
+    const totalLayers = 2 + numHiddenLayers;
+    const totalWidth = totalLayers * spacing + padding * 2 + legendSpace;
+    const totalHeight = 200;
+
+    const svgContainer = document.createElement('div');
+    svgContainer.setAttribute('style', 'overflow-x: auto; overflow-y: hidden; border: 1px solid #ccc; background: #fafafa; border-radius: 4px; margin: 1rem 0; height: 220px;');
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', totalWidth);
+    svg.setAttribute('height', totalHeight);
+    svg.setAttribute('style', 'display: block;');
+
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    defs.innerHTML = `
+        <linearGradient id="inputGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#4caf50;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#2e7d32;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="rnnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#9c27b0;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#6a1b9a;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="lstmGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#2196f3;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1565c0;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="gruGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#ff9800;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#ef6c00;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="outGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#f44336;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#c62828;stop-opacity:1" />
+        </linearGradient>
+    `;
+    svg.appendChild(defs);
+
+    let xPos = padding + legendSpace;
+    const cy = totalHeight / 2;
+    const cellType = (rnn.cellType || 'lstm').toLowerCase();
+
+    drawRNNInputLayer(svg, xPos, cy, rnn.inputSize || 4);
+    xPos += spacing;
+
+    const hiddenSizes = rnn.hiddenSizes || [16];
+    for (let i = 0; i < hiddenSizes.length; i++) {
+        drawRNNCellLayer(svg, xPos, cy, cellType, hiddenSizes[i], i + 1);
+        xPos += spacing;
+    }
+
+    drawRNNOutputLayer(svg, xPos, cy, rnn.outputSize || 3, rnn.outputActivation || 'linear');
+    drawRNNLegend(svg, padding + 5, cy - 40, cellType);
+
+    svgContainer.innerHTML = '';
+    svgContainer.appendChild(svg);
+    container.innerHTML = '';
+    container.appendChild(svgContainer);
+}
+
+function drawRNNInputLayer(svg, x, cy, size) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    box.setAttribute('x', x - 25); box.setAttribute('y', cy - 35);
+    box.setAttribute('width', 50); box.setAttribute('height', 70);
+    box.setAttribute('fill', 'url(#inputGrad)'); box.setAttribute('stroke', '#1b5e20');
+    box.setAttribute('stroke-width', 1.5); box.setAttribute('rx', 3);
+    g.appendChild(box);
+
+    const text1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text1.setAttribute('x', x); text1.setAttribute('y', cy - 12);
+    text1.setAttribute('text-anchor', 'middle'); text1.setAttribute('font-size', '10');
+    text1.setAttribute('font-weight', 'bold'); text1.setAttribute('fill', 'white');
+    text1.textContent = 'Input';
+    g.appendChild(text1);
+
+    const text2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text2.setAttribute('x', x); text2.setAttribute('y', cy + 8);
+    text2.setAttribute('text-anchor', 'middle'); text2.setAttribute('font-size', '9');
+    text2.setAttribute('fill', 'white');
+    text2.textContent = `${size}`;
+    g.appendChild(text2);
+
+    svg.appendChild(g);
+}
+
+function drawRNNCellLayer(svg, x, cy, cellType, hiddenSize, layerNum) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    let gradId = 'lstmGrad', strokeColor = '#1565c0', label = 'LSTM';
+    if (cellType === 'gru') { gradId = 'gruGrad'; strokeColor = '#ef6c00'; label = 'GRU'; }
+    else if (cellType === 'rnn' || cellType === 'simplernn') { gradId = 'rnnGrad'; strokeColor = '#6a1b9a'; label = 'RNN'; }
+
+    const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    box.setAttribute('x', x - 28); box.setAttribute('y', cy - 35);
+    box.setAttribute('width', 56); box.setAttribute('height', 70);
+    box.setAttribute('fill', `url(#${gradId})`); box.setAttribute('stroke', strokeColor);
+    box.setAttribute('stroke-width', 1.5); box.setAttribute('rx', 3);
+    g.appendChild(box);
+
+    const recur = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    recur.setAttribute('d', `M${x-10},${cy-35} Q${x-10},${cy-50} ${x},${cy-50} Q${x+10},${cy-50} ${x+10},${cy-35}`);
+    recur.setAttribute('fill', 'none'); recur.setAttribute('stroke', 'white');
+    recur.setAttribute('stroke-width', 2);
+    g.appendChild(recur);
+
+    const text1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text1.setAttribute('x', x); text1.setAttribute('y', cy - 5);
+    text1.setAttribute('text-anchor', 'middle'); text1.setAttribute('font-size', '10');
+    text1.setAttribute('font-weight', 'bold'); text1.setAttribute('fill', 'white');
+    text1.textContent = `${label}${layerNum}`;
+    g.appendChild(text1);
+
+    const text2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text2.setAttribute('x', x); text2.setAttribute('y', cy + 12);
+    text2.setAttribute('text-anchor', 'middle'); text2.setAttribute('font-size', '9');
+    text2.setAttribute('fill', 'white');
+    text2.textContent = `h=${hiddenSize}`;
+    g.appendChild(text2);
+
+    svg.appendChild(g);
+}
+
+function drawRNNOutputLayer(svg, x, cy, size, activation) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    box.setAttribute('x', x - 28); box.setAttribute('y', cy - 35);
+    box.setAttribute('width', 56); box.setAttribute('height', 70);
+    box.setAttribute('fill', 'url(#outGrad)'); box.setAttribute('stroke', '#c62828');
+    box.setAttribute('stroke-width', 1.5); box.setAttribute('rx', 3);
+    g.appendChild(box);
+
+    const text1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text1.setAttribute('x', x); text1.setAttribute('y', cy - 12);
+    text1.setAttribute('text-anchor', 'middle'); text1.setAttribute('font-size', '10');
+    text1.setAttribute('font-weight', 'bold'); text1.setAttribute('fill', 'white');
+    text1.textContent = 'Output';
+    g.appendChild(text1);
+
+    const text2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text2.setAttribute('x', x); text2.setAttribute('y', cy + 5);
+    text2.setAttribute('text-anchor', 'middle'); text2.setAttribute('font-size', '9');
+    text2.setAttribute('fill', 'white');
+    text2.textContent = `${size}`;
+    g.appendChild(text2);
+
+    const text3 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text3.setAttribute('x', x); text3.setAttribute('y', cy + 18);
+    text3.setAttribute('text-anchor', 'middle'); text3.setAttribute('font-size', '8');
+    text3.setAttribute('fill', 'white');
+    text3.textContent = activation;
+    g.appendChild(text3);
+
+    svg.appendChild(g);
+}
+
+function drawRNNLegend(svg, x, y, cellType) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    let cellColor = 'url(#lstmGrad)', cellLabel = 'LSTM';
+    if (cellType === 'gru') { cellColor = 'url(#gruGrad)'; cellLabel = 'GRU'; }
+    else if (cellType === 'rnn' || cellType === 'simplernn') { cellColor = 'url(#rnnGrad)'; cellLabel = 'RNN'; }
+
+    const items = [
+        { label: 'Input', color: 'url(#inputGrad)' },
+        { label: cellLabel, color: cellColor },
+        { label: 'Output', color: 'url(#outGrad)' }
+    ];
+
+    let yOffset = y;
+    items.forEach(item => {
+        const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        box.setAttribute('x', x); box.setAttribute('y', yOffset);
+        box.setAttribute('width', 10); box.setAttribute('height', 10);
+        box.setAttribute('fill', item.color); box.setAttribute('stroke', '#666');
+        box.setAttribute('stroke-width', 0.5); box.setAttribute('rx', 2);
+        g.appendChild(box);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x + 14); text.setAttribute('y', yOffset + 8);
+        text.setAttribute('font-size', '9'); text.setAttribute('fill', '#333');
+        text.textContent = item.label;
+        g.appendChild(text);
+
+        yOffset += 18;
+    });
+
+    svg.appendChild(g);
+}
+</script>
+    <h1>Facaded RNN</h1>
 
     <div class="section">
         <h2>Network Configuration</h2>
@@ -201,11 +315,20 @@
         <br><br>
         <button onclick="createNetwork()">Create Network</button>
         <span id="networkStatus" style="margin-left:1rem;"></span>
+        <div id="networkViz"></div>
     </div>
 
     <div class="section">
         <h2>Regularization</h2>
         <label>Dropout Rate (0-1): <input type="number" id="dropoutRate" value="0" step="0.1" min="0" max="0.9"></label>
+    </div>
+
+    <div class="section">
+        <h2>Save/Load Network</h2>
+        <button onclick="saveNetwork()">Save Network (.json)</button>
+        <button onclick="loadNetwork()">Load Network (.json)</button>
+        <input type="file" id="modelFile" accept=".json" style="display:none;">
+        <span id="modelStatus"></span>
     </div>
 
     <div class="section">
@@ -705,10 +828,338 @@
         toJSON() { return { inputSize: this.inputSize, outputSize: this.outputSize, activation: this.activation, W: this.W, b: this.b }; }
         static fromJSON(j) { const o = new OutputLayer(j.inputSize, j.outputSize, j.activation); o.W = j.W; o.b = j.b; return o; }
     }
-    </script>
+    // ========== RNN Facade Class ==========
+    class RNNFacade {
+        constructor(config) {
+            this.inputSize = config.inputSize;
+            this.outputSize = config.outputSize;
+            this.hiddenSizes = config.hiddenSizes;
+            this.cellType = config.cellType || 'lstm';
+            this.activation = config.activation || 'tanh';
+            this.outputActivation = config.outputActivation || 'linear';
+            this.lossFunction = config.lossFunction || 'mse';
+            this.learningRate = config.learningRate || 0.01;
+            this.gradientClip = config.gradientClip || 5.0;
+            this.bpttSteps = config.bpttSteps || 0;
+            this.dropoutRate = 0;
+            this.useDropout = false;
 
-    <!-- Include the RNNFacade class -->
-    <script src="RNNFacade.js"></script>
+            this.cells = [];
+            let prevSize = this.inputSize;
+            for (const hs of this.hiddenSizes) {
+                let cell;
+                if (this.cellType === 'lstm') cell = new LSTMCell(prevSize, hs, this.activation);
+                else if (this.cellType === 'gru') cell = new GRUCell(prevSize, hs, this.activation);
+                else cell = new SimpleRNNCell(prevSize, hs, this.activation);
+                this.cells.push(cell);
+                prevSize = hs;
+            }
+            this.outputLayer = new OutputLayer(prevSize, this.outputSize, this.outputActivation);
+            this.caches = [];
+            this.allStates = [];
+        }
+
+        setDropoutRate(rate) { this.dropoutRate = rate; this.useDropout = rate > 0; }
+
+        initHiddenState() {
+            return this.cells.map(cell => ({
+                h: new Array(cell.getHiddenSize()).fill(0),
+                c: new Array(cell.getHiddenSize()).fill(0)
+            }));
+        }
+
+        forwardStep(input, states) {
+            const cellCaches = [];
+            let x = input;
+            const newStates = [];
+            for (let i = 0; i < this.cells.length; i++) {
+                const cell = this.cells[i];
+                let cache;
+                if (cell instanceof LSTMCell) {
+                    cache = cell.forward(x, states[i].h, states[i].c);
+                    newStates.push({ h: cache.h, c: cache.c });
+                } else {
+                    cache = cell.forward(x, states[i].h);
+                    newStates.push({ h: cache.h, c: states[i].c });
+                }
+                cellCaches.push(cache);
+                x = cache.h;
+            }
+            const outCache = this.outputLayer.forward(x);
+            return { output: outCache.output, cellCaches, outCache, states: newStates };
+        }
+
+        forwardSequence(inputs) {
+            let states = this.initHiddenState();
+            const outputs = [];
+            this.caches = [];
+            this.allStates = [states];
+            for (const input of inputs) {
+                const result = this.forwardStep(input, states);
+                outputs.push(result.output);
+                this.caches.push({ cellCaches: result.cellCaches, outCache: result.outCache });
+                states = result.states;
+                this.allStates.push(states);
+            }
+            return outputs;
+        }
+
+        backwardSequence(targets) {
+            const T = targets.length;
+            const lossFn = LossFunctions[this.lossFunction];
+            let totalLoss = 0;
+            let dStates = this.cells.map(cell => ({
+                dh: new Array(cell.getHiddenSize()).fill(0),
+                dc: new Array(cell.getHiddenSize()).fill(0)
+            }));
+            const bpttLimit = this.bpttSteps > 0 ? this.bpttSteps : T;
+            for (let t = T - 1; t >= Math.max(0, T - bpttLimit); t--) {
+                const { cellCaches, outCache } = this.caches[t];
+                const target = targets[t];
+                totalLoss += lossFn.loss(outCache.output, target);
+                const dOut = lossFn.gradient(outCache.output, target);
+                let dh = this.outputLayer.backward(dOut, outCache, this.gradientClip);
+                for (let i = this.cells.length - 1; i >= 0; i--) {
+                    const cell = this.cells[i];
+                    const cache = cellCaches[i];
+                    cache.h = this.allStates[t + 1][i].h;
+                    const dhTotal = dh.map((d, j) => d + dStates[i].dh[j]);
+                    let result;
+                    if (cell instanceof LSTMCell) {
+                        result = cell.backward(dhTotal, dStates[i].dc, cache, this.gradientClip);
+                        dStates[i].dc = result.dPrevC;
+                    } else {
+                        result = cell.backward(dhTotal, cache, this.gradientClip);
+                    }
+                    dStates[i].dh = result.dPrevH;
+                    dh = result.dInput;
+                }
+            }
+            return totalLoss / T;
+        }
+
+        trainSequence(inputs, targets) {
+            this.resetGradients();
+            this.forwardSequence(inputs);
+            const loss = this.backwardSequence(targets);
+            this.applyGradients();
+            return loss;
+        }
+
+        predict(inputs) {
+            return this.forwardSequence(inputs);
+        }
+
+        resetGradients() {
+            for (const cell of this.cells) cell.resetGradients();
+            this.outputLayer.resetGradients();
+        }
+
+        applyGradients() {
+            for (const cell of this.cells) cell.applyGradients(this.learningRate, this.gradientClip);
+            this.outputLayer.applyGradients(this.learningRate, this.gradientClip);
+        }
+
+        getHiddenState(layerIdx, timestep, neuronIdx) {
+            if (this.allStates.length > timestep + 1 && layerIdx < this.cells.length) {
+                return this.allStates[timestep + 1][layerIdx].h[neuronIdx] || 0;
+            }
+            return 0;
+        }
+
+        getCellState(layerIdx, timestep, neuronIdx) {
+            if (this.allStates.length > timestep + 1 && layerIdx < this.cells.length) {
+                return this.allStates[timestep + 1][layerIdx].c[neuronIdx] || 0;
+            }
+            return 0;
+        }
+
+        getOutput(timestep, outputIdx) {
+            if (this.caches.length > timestep) {
+                return this.caches[timestep].outCache.output[outputIdx] || 0;
+            }
+            return 0;
+        }
+
+        getInputVector(timestep, inputIdx) {
+            if (this.caches.length > timestep && this.caches[timestep].cellCaches.length > 0) {
+                return this.caches[timestep].cellCaches[0].input[inputIdx] || 0;
+            }
+            return 0;
+        }
+
+        getPreActivation(layerIdx, timestep, neuronIdx) {
+            if (this.caches.length > timestep && layerIdx < this.caches[timestep].cellCaches.length) {
+                const cache = this.caches[timestep].cellCaches[layerIdx];
+                return cache.preH ? cache.preH[neuronIdx] || 0 : 0;
+            }
+            return 0;
+        }
+
+        getGateValue(gateType, layerIdx, timestep, neuronIdx) {
+            if (this.caches.length > timestep && layerIdx < this.caches[timestep].cellCaches.length) {
+                const cache = this.caches[timestep].cellCaches[layerIdx];
+                const gateMap = { f: 'f', i: 'i', o: 'o', cTilde: 'cTilde', z: 'z', r: 'r', hTilde: 'hTilde' };
+                const key = gateMap[gateType];
+                return cache[key] ? cache[key][neuronIdx] || 0 : 0;
+            }
+            return 0;
+        }
+
+        getWeightGradient(layerIdx, neuronIdx, weightIdx) {
+            if (layerIdx < this.cells.length) {
+                const cell = this.cells[layerIdx];
+                if (cell instanceof LSTMCell) return cell.dWf[neuronIdx]?.[weightIdx] || 0;
+                if (cell instanceof GRUCell) return cell.dWz[neuronIdx]?.[weightIdx] || 0;
+                return cell.dWih[neuronIdx]?.[weightIdx] || 0;
+            }
+            return 0;
+        }
+
+        getBiasGradient(layerIdx, neuronIdx) {
+            if (layerIdx < this.cells.length) {
+                const cell = this.cells[layerIdx];
+                if (cell instanceof LSTMCell) return cell.dbf[neuronIdx] || 0;
+                if (cell instanceof GRUCell) return cell.dbz[neuronIdx] || 0;
+                return cell.dbh[neuronIdx] || 0;
+            }
+            return 0;
+        }
+
+        getCellGradient(layerIdx, timestep, neuronIdx) { return 0; }
+
+        getOptimizerState(layerIdx, neuronIdx, paramIdx) {
+            return { momentum: 0, velocity: 0, t: 0 };
+        }
+
+        getSequenceOutputs(outputIdx) {
+            return this.caches.map(c => c.outCache.output[outputIdx] || 0);
+        }
+
+        getSequenceHiddenStates(layerIdx, neuronIdx) {
+            return this.allStates.slice(1).map(s => s[layerIdx]?.h[neuronIdx] || 0);
+        }
+
+        getSequenceCellStates(layerIdx, neuronIdx) {
+            return this.allStates.slice(1).map(s => s[layerIdx]?.c[neuronIdx] || 0);
+        }
+
+        getSequenceGateValues(gateType, layerIdx, neuronIdx) {
+            const gateMap = { f: 'f', i: 'i', o: 'o', cTilde: 'cTilde', z: 'z', r: 'r', hTilde: 'hTilde' };
+            const key = gateMap[gateType];
+            return this.caches.map(c => c.cellCaches[layerIdx]?.[key]?.[neuronIdx] || 0);
+        }
+
+        getDropoutMask(layerIdx, timestep, neuronIdx) { return 1.0; }
+
+        getLayerNormStats(layerIdx, timestep) {
+            return { mean: 0, variance: 1, gamma: 1, beta: 0 };
+        }
+
+        resetHiddenState(layerIdx, value) {}
+        resetCellState(layerIdx, value) {}
+        resetAllStates(value) {}
+        injectHiddenState(layerIdx, values) {}
+        setHiddenState(layerIdx, timestep, neuronIdx, value) {}
+        setOutput(timestep, outputIdx, value) {}
+
+        getHiddenStateHistogram(layerIdx, timestep, numBins) {
+            const bins = [];
+            for (let i = 0; i < numBins; i++) {
+                bins.push({ rangeMin: -1 + i * 0.2, rangeMax: -1 + (i + 1) * 0.2, count: 0 });
+            }
+            return bins;
+        }
+
+        getActivationHistogramOverTime(layerIdx, neuronIdx, numBins) {
+            return this.getHiddenStateHistogram(layerIdx, 0, numBins);
+        }
+
+        getGateSaturation(gateType, layerIdx, timestep, threshold) {
+            return { nearZeroCount: 0, nearOneCount: 0, totalCount: 1, nearZeroPct: 0, nearOnePct: 0 };
+        }
+
+        getGradientScalesOverTime(layerIdx) {
+            return this.caches.map((_, t) => ({ timestep: t, meanAbsGrad: 0 }));
+        }
+
+        detectVanishingGradient(layerIdx, threshold) { return false; }
+        detectExplodingGradient(layerIdx, threshold) { return false; }
+
+        getLayerCount() { return this.cells.length; }
+        getHiddenSize(layerIdx) { return this.cells[layerIdx]?.getHiddenSize() || 0; }
+        getCellType() { return this.cellType; }
+        getSequenceLength() { return this.caches.length; }
+
+        toJSON() {
+            return JSON.stringify({
+                input_size: this.inputSize,
+                output_size: this.outputSize,
+                hidden_sizes: this.hiddenSizes,
+                cell_type: this.cellType === 'rnn' ? 'simplernn' : this.cellType,
+                activation: this.activation,
+                output_activation: this.outputActivation,
+                loss_type: this.lossFunction,
+                learning_rate: this.learningRate,
+                gradient_clip: this.gradientClip,
+                bptt_steps: this.bpttSteps,
+                dropout_rate: this.dropoutRate,
+                cells: this.cells.map(c => {
+                    const base = c.toJSON();
+                    if (c instanceof LSTMCell) {
+                        return { Wf: base.Wf, Wi: base.Wi, Wc: base.Wc, Wo: base.Wo, Bf: base.bf, Bi: base.bi, Bc: base.bc, Bo: base.bo };
+                    } else if (c instanceof GRUCell) {
+                        return { Wz: base.Wz, Wr: base.Wr, Wh: base.Wh, Bz: base.bz, Br: base.br, Bh: base.bh };
+                    } else {
+                        return { Wih: base.Wih, Whh: base.Whh, bh: base.bh };
+                    }
+                }),
+                output_layer: { W: this.outputLayer.W, B: this.outputLayer.b }
+            });
+        }
+
+        static fromJSON(jsonStr) {
+            const obj = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+            const config = {
+                inputSize: obj.input_size ?? obj.inputSize,
+                outputSize: obj.output_size ?? obj.outputSize,
+                hiddenSizes: obj.hidden_sizes ?? obj.hiddenSizes,
+                cellType: obj.cell_type ?? obj.cellType,
+                activation: obj.activation,
+                outputActivation: obj.output_activation ?? obj.outputActivation,
+                lossFunction: obj.loss_type ?? obj.lossFunction ?? 'mse',
+                learningRate: obj.learning_rate ?? obj.learningRate ?? 0.01,
+                gradientClip: obj.gradient_clip ?? obj.gradientClip ?? 5.0,
+                bpttSteps: obj.bptt_steps ?? obj.bpttSteps ?? 0
+            };
+            if (config.cellType === 'simplernn') config.cellType = 'rnn';
+            const facade = new RNNFacade(config);
+            facade.dropoutRate = obj.dropout_rate ?? obj.dropoutRate ?? 0;
+            
+            if (obj.cells && obj.cells.length > 0) {
+                for (let i = 0; i < obj.cells.length; i++) {
+                    const cellData = obj.cells[i];
+                    const cell = facade.cells[i];
+                    if (cell instanceof LSTMCell) {
+                        cell.Wf = cellData.Wf; cell.Wi = cellData.Wi; cell.Wc = cellData.Wc; cell.Wo = cellData.Wo;
+                        cell.bf = cellData.Bf ?? cellData.bf; cell.bi = cellData.Bi ?? cellData.bi;
+                        cell.bc = cellData.Bc ?? cellData.bc; cell.bo = cellData.Bo ?? cellData.bo;
+                    } else if (cell instanceof GRUCell) {
+                        cell.Wz = cellData.Wz; cell.Wr = cellData.Wr; cell.Wh = cellData.Wh;
+                        cell.bz = cellData.Bz ?? cellData.bz; cell.br = cellData.Br ?? cellData.br; cell.bh = cellData.Bh ?? cellData.bh;
+                    } else {
+                        cell.Wih = cellData.Wih; cell.Whh = cellData.Whh; cell.bh = cellData.bh;
+                    }
+                }
+            }
+            if (obj.output_layer) {
+                facade.outputLayer.W = obj.output_layer.W;
+                facade.outputLayer.b = obj.output_layer.B ?? obj.output_layer.b;
+            }
+            return facade;
+        }
+    }
+    </script>
 
     <script>
     // ========== Global State ==========
@@ -741,6 +1192,52 @@
         validationLoss = [];
         document.getElementById("networkStatus").textContent =
             `Created ${config.cellType.toUpperCase()}: In=${config.inputSize}, Hidden=[${config.hiddenSizes}], Out=${config.outputSize}`;
+        visualizeRNNArchitecture(facade, 'networkViz');
+    }
+
+    function saveNetwork() {
+        if (!facade) return alert("Create an RNN first.");
+        const blob = new Blob([facade.toJSON()], {type: "application/json"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "rnn-network.json";
+        a.click();
+        document.getElementById('modelStatus').textContent = "Network saved.";
+    }
+
+    function loadNetwork() {
+        document.getElementById('modelFile').onchange = function(evt) {
+            const file = evt.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    facade = RNNFacade.fromJSON(e.target.result);
+                    if (!facade) {
+                        document.getElementById('modelStatus').textContent = "Error: Failed to parse model";
+                        return;
+                    }
+                    document.getElementById('modelStatus').textContent = "Network loaded!";
+                    document.getElementById("inputSize").value = facade.inputSize;
+                    document.getElementById("hiddenSizes").value = facade.hiddenSizes.join(",");
+                    document.getElementById("outputSize").value = facade.outputSize;
+                    document.getElementById("cellType").value = facade.cellType === 'rnn' ? 'rnn' : facade.cellType;
+                    document.getElementById("activation").value = facade.activation;
+                    document.getElementById("outputActivation").value = facade.outputActivation;
+                    document.getElementById("lossFunction").value = facade.lossFunction;
+                    document.getElementById("learningRate").value = facade.learningRate;
+                    document.getElementById("gradientClip").value = facade.gradientClip;
+                    document.getElementById("bpttSteps").value = facade.bpttSteps;
+                    document.getElementById("dropoutRate").value = facade.dropoutRate;
+                    visualizeRNNArchitecture(facade, 'networkViz');
+                } catch (err) {
+                    document.getElementById('modelStatus').textContent = "Error: " + err.message;
+                    console.error("Load error:", err);
+                }
+            };
+            reader.readAsText(file);
+        };
+        document.getElementById('modelFile').click();
     }
 
     function parseCSV(text, inputSize, outputSize) {
